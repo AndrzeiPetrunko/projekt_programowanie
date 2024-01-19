@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace projekt_programowanie
 {
@@ -16,35 +17,56 @@ namespace projekt_programowanie
         public Form1()
         {
             InitializeComponent();
-        }
+            this.textBox2.AutoSize = false;
+            this.textBox1.AutoSize = false;
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            string ConString = "Data Source = (localDB)\\MSSQLLocalDB; Initial Catalog = LocalDB; Integrated Security = true";
-            SqlConnection con = new SqlConnection(ConString);
-            con.Open();
         }
-
+        
         private void button1_Click(object sender, EventArgs e)
         {
-            string ConString = "Data Source = (localDB)\\MSSQLLocalDB; Initial Catalog = LocalDB; Integrated Security = true";
-            SqlConnection con = new SqlConnection(ConString);
+            SqlConnection con = new SqlConnection("Data Source = (localDB)\\MSSQLLocalDB; Initial Catalog = LocalDB; Integrated Security = true");
             con.Open();
-            string query = $"INSERT INTO Customers(FirstName, LastName) VALUES (\'{textBox1.Text.ToString()}\',\'{textBox2.Text.ToString()}\');" +
-                $"SELECT * FROM Customers WHERE FirstName = \'{textBox1.Text.ToString()}\'";
+            string query = $"SELECT * FROM UserLogin WHERE UserLogin = '{textBox1.Text.ToString()}' AND UserPassword = '{textBox2.Text.ToString()}'";
             SqlCommand cmd = new SqlCommand(query, con);
-            SqlDataReader r = cmd.ExecuteReader();
-            while (r.Read())
+            SqlDataReader read = cmd.ExecuteReader();
+            bool userFound = false;
+            while (read.Read())
             {
-                MessageBox.Show($"{r.GetValue(3).ToString()} : {r.GetValue(4).ToString()}");
+                if (read.GetValue(1).ToString() == textBox1.Text && read.GetValue(2).ToString() == textBox2.Text)
+                {
+                    userFound = true;
+                    this.Hide();
+                    Form LoggedUser = new Form2();
+                    LoggedUser.Size = this.Size;
+                    LoggedUser.Location = this.Location;
+                    LoggedUser.StartPosition = FormStartPosition.Manual;
+                    LoggedUser.Show();
+                    LoggedUser.BringToFront();
+                    con.Close();
+                    break;
+                }
+                
             }
-            OpenSecondForm();
-            
+            if (!userFound)
+            {
+                MessageBox.Show("Nie znaleziono użytkownika.");
+            }
+
+
         }
-        void OpenSecondForm()
+
+        private void button2_Click(object sender, EventArgs e)
         {
-            Form form2 = new Form();
-            form2.ShowDialog();
+            
+            this.Hide();
+            Form RegScreen = new Form3();
+            RegScreen.Size = this.Size;
+            RegScreen.Location = this.Location;
+            RegScreen.StartPosition = FormStartPosition.Manual;
+            RegScreen.Show();
+            RegScreen.BringToFront();
+            RegScreen.Text = "Rejestacja użytkownika Varus";
+            
         }
     }
 }
