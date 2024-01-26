@@ -9,20 +9,23 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics.Eventing.Reader;
+using System.Security.Cryptography.X509Certificates;
 
 namespace projekt_programowanie
 {
-    public partial class Form1 : Form
+    public partial class Form1 : Form   
     {
+        public static int UserID;
         public Form1()
         {
             InitializeComponent();
             this.textBox2.AutoSize = false;
             this.textBox1.AutoSize = false;
-
+            
         }
         
-        private void button1_Click(object sender, EventArgs e)
+        public void button1_Click(object sender, EventArgs e)
         {
             SqlConnection con = new SqlConnection("Data Source = (localDB)\\MSSQLLocalDB; Initial Catalog = LocalDB; Integrated Security = true");
             con.Open();
@@ -34,10 +37,27 @@ namespace projekt_programowanie
             {
                 if (read.GetValue(1).ToString() == textBox1.Text && read.GetValue(2).ToString() == textBox2.Text)
                 {
+                    UserID = Convert.ToInt32(read.GetValue(0));
+                    read.Close();
                     userFound = true;
                     this.Hide();
-                    Form LoggedUser = new Form2();
-                    LoggedUser.Size = this.Size;
+                    Form2 LoggedUser = new Form2();
+                    string checkUsernameQ = "SELECT FirstName FROM Customers C JOIN UserLogin UL ON C.FK_UserID = UL.UserID WHERE UL.UserLogin = '" + textBox1.Text.ToString() + "';";
+                    SqlCommand checkUsernameCom = new SqlCommand(checkUsernameQ, con);
+                    SqlDataReader checkUsernameRead = checkUsernameCom.ExecuteReader();
+                    if (checkUsernameRead.Read())
+                    {
+                        if (checkUsernameRead.IsDBNull(0) || checkUsernameRead.GetValue(0).ToString() == "")
+                        {
+                            LoggedUser.Text = "User's profile";
+                        }
+                        else
+                        {
+                            LoggedUser.Text = checkUsernameRead.GetValue(0).ToString() + "'s profile";
+                        }
+                    }
+
+                    
                     LoggedUser.Location = this.Location;
                     LoggedUser.StartPosition = FormStartPosition.Manual;
                     LoggedUser.Show();

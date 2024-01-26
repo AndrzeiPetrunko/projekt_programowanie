@@ -50,7 +50,7 @@
             // 
             this.textBox2.Location = new System.Drawing.Point(299, 185);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(130, 22);
+            this.textBox2.Size = new System.Drawing.Size(133, 22);
             this.textBox2.TabIndex = 1;
             this.textBox2.UseSystemPasswordChar = true;
             // 
@@ -145,7 +145,7 @@
             this.Controls.Add(this.textBox1);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Varus";
+            this.Text = " Logowanie Varus";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -153,8 +153,6 @@
 
 
         #endregion
-
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
@@ -162,6 +160,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
+        public System.Windows.Forms.TextBox textBox1;
     }
 }
 

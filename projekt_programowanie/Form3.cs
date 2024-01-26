@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -47,21 +48,36 @@ namespace projekt_programowanie
             {
                 if (textBox2.Text == textBox3.Text)
                 {
-                    SqlConnection ConnectionCreateAccount = new SqlConnection("Data Source = (localDB)\\MSSQLLocalDB; Initial Catalog = LocalDB; Integrated Security = true; MultipleActiveResultSets = true");
-                    ConnectionCreateAccount.Open();
+                    int ID;
                     string CreateAccount = $"INSERT INTO UserLogin(UserLogin,UserPassword) VALUES ('{textBox1.Text.ToString()}', " +
-                    $"'{textBox2.Text.ToString()}')";
+                    $"'{textBox2.Text.ToString()}');";
                     SqlCommand sqlCommand = new SqlCommand(CreateAccount, Connection);
                     SqlDataReader ReadCreateAccount = sqlCommand.ExecuteReader();
+                    ReadCreateAccount.Close();
+                    string getIDQ = "SELECT UserID FROM UserLogin WHERE UserLogin = " + "'" + this.textBox1.Text.ToString() + "'";
+                    SqlCommand getIDCom = new SqlCommand(getIDQ, Connection);
+                    SqlDataReader getIDRead = getIDCom.ExecuteReader();
+                    while (getIDRead.Read()) { ID = Convert.ToInt32(getIDRead.GetValue(0));
+                        DateTime dateTime = DateTime.UtcNow.Date;
+                        string InsertCustomerQ = $"INSERT INTO Customers(FK_UserID, RegistrationDate) VALUES ({ID}, '{dateTime.Year.ToString()}-{dateTime.Month.ToString()}-{dateTime.Day.ToString()}')";
+                        SqlCommand InsertCustomerCom = new SqlCommand(InsertCustomerQ, Connection);
+                        SqlDataReader InsertCustomerRead = InsertCustomerCom.ExecuteReader();
+                        InsertCustomerRead.Close();
+                        getIDRead.Close();
+                        break;
+                    }
+
+                    
                     MessageBox.Show("Utworzyłeś konto !");
                     this.Hide();
-                    Form RegScreen = new Form1();
-                    RegScreen.Size = this.Size;
-                    RegScreen.Location = this.Location;
-                    RegScreen.StartPosition = FormStartPosition.Manual;
-                    RegScreen.Show();
-                    RegScreen.BringToFront();
-                    RegScreen.Text = "Varus";
+                    Form LogScreen = new Form1();
+                    LogScreen.Size = this.Size;
+                    LogScreen.Location = this.Location;
+                    LogScreen.StartPosition = FormStartPosition.Manual;
+                    LogScreen.Show();
+                    LogScreen.BringToFront();
+                    LogScreen.Text = "Varus";
+                    Connection.Close();
                 }
                 else
                 {
