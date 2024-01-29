@@ -25,7 +25,7 @@ namespace projekt_programowanie
             
         }
         
-        public void button1_Click(object sender, EventArgs e)
+        public void LogowanieOkno(object sender, EventArgs e)
         {
             SqlConnection con = new SqlConnection("Data Source = (localDB)\\MSSQLLocalDB; Initial Catalog = LocalDB; Integrated Security = true");
             con.Open();
@@ -75,7 +75,7 @@ namespace projekt_programowanie
 
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void RejestracjaOkno(object sender, EventArgs e)
         {
             
             this.Hide();
