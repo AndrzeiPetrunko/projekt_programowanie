@@ -35,6 +35,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label2
@@ -105,7 +106,17 @@
             this.button1.TabIndex = 10;
             this.button1.Text = "Utwórz konto";
             this.button1.UseVisualStyleBackColor = false;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button1.Click += new System.EventHandler(this.Registration);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(26, 25);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(101, 43);
+            this.button2.TabIndex = 11;
+            this.button2.Text = "Wróć";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.CancelReg);
             // 
             // Form3
             // 
@@ -113,6 +124,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.RoyalBlue;
             this.ClientSize = new System.Drawing.Size(656, 744);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.textBox3);
@@ -137,5 +149,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
     }
 }

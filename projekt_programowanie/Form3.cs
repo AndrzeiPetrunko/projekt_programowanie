@@ -22,7 +22,7 @@ namespace projekt_programowanie
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void Registration(object sender, EventArgs e)
         {
             SqlConnection Connection = new SqlConnection("Data Source = (localDB)\\MSSQLLocalDB; Initial Catalog = LocalDB; Integrated Security = true; MultipleActiveResultSets = true");
             Connection.Open();
@@ -85,6 +85,16 @@ namespace projekt_programowanie
                 }
                 
             }
+        }
+
+        private void CancelReg(object sender, EventArgs e)
+        {
+            this.Hide();
+            Form1 Logowanie = new Form1();
+            Logowanie.Location = this.Location;
+            Logowanie.StartPosition = FormStartPosition.Manual;
+            Logowanie.Show();
+            Logowanie.BringToFront();
         }
     }
 }
