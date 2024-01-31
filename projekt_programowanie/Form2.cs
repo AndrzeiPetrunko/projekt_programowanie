@@ -20,12 +20,15 @@ namespace projekt_programowanie
         private Button AllOrders;
         private Button NewOrder;
         private DataGridView dataGridView1;
+        private Button button4;
         private Button button1;
+        private Label label1;
+        private double OrderSum;
 
         public Form2()
         {
             InitializeComponent();
-           
+
         }
 
         private void InitializeComponent()
@@ -38,6 +41,8 @@ namespace projekt_programowanie
             this.AllOrders = new System.Windows.Forms.Button();
             this.NewOrder = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.button4 = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -105,6 +110,7 @@ namespace projekt_programowanie
             this.AllOrders.TabIndex = 4;
             this.AllOrders.Text = "Zobacz wszystkie";
             this.AllOrders.UseVisualStyleBackColor = true;
+            this.AllOrders.Click += new System.EventHandler(this.AllOrders_Click);
             // 
             // NewOrder
             // 
@@ -129,14 +135,40 @@ namespace projekt_programowanie
             this.dataGridView1.Margin = new System.Windows.Forms.Padding(0);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 51;
-            this.dataGridView1.Size = new System.Drawing.Size(319, 188);
+            this.dataGridView1.Size = new System.Drawing.Size(476, 148);
             this.dataGridView1.TabIndex = 3;
             this.dataGridView1.Visible = false;
+            // 
+            // button4
+            // 
+            this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.button4.Location = new System.Drawing.Point(275, 168);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(84, 51);
+            this.button4.TabIndex = 5;
+            this.button4.Text = "Potwierdź";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Visible = false;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label1.Location = new System.Drawing.Point(270, 236);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(79, 29);
+            this.label1.TabIndex = 6;
+            this.label1.Text = "label1";
             // 
             // Form2
             // 
             this.BackColor = System.Drawing.Color.RoyalBlue;
             this.ClientSize = new System.Drawing.Size(749, 419);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.button4);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
@@ -147,6 +179,7 @@ namespace projekt_programowanie
             this.panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -174,11 +207,11 @@ namespace projekt_programowanie
 
         private void Orders(object sender, EventArgs e)
         {
-            if (panel2.Visible == false) { panel2.Visible = true;  }
+            if (panel2.Visible == false) { panel2.Visible = true; }
             else { panel2.Visible = false; };
+            if (button4.Visible == true) { button4.Visible = false; } else { button4.Visible = true; };
         }
-
-        private void Form2_Load(object sender, EventArgs e)
+   private void Form2_Load(object sender, EventArgs e)
         {
             SqlConnection Connection = new SqlConnection("Data Source = (localDB)\\MSSQLLocalDB; Initial Catalog = LocalDB; Integrated Security = true; MultipleActiveResultSets = true");
             Connection.Open();
@@ -198,6 +231,8 @@ namespace projekt_programowanie
                 Name = "Amount",
                 HeaderText = "Amount",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells
+                
+
             };
             dataGridView1.Columns.Insert(0, checkBoxColumn);
             dataGridView1.Columns.Insert(4, textBoxColumn);
@@ -206,7 +241,42 @@ namespace projekt_programowanie
 
         private void NewOrder_Click(object sender, EventArgs e)
         {
-            dataGridView1.Visible = true;
+
+            if (dataGridView1.Visible == true && button4.Visible == true)
+            { dataGridView1.Visible = false;
+                button4.Visible = false; }
+            else
+            {
+                dataGridView1.Visible = true;
+                button4.Visible = true;
+            }
+            NewOrder.Enabled = false;
+            AllOrders.Enabled = true;
+            
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            OrderSum = 0;
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                DataGridViewCheckBoxCell checkBoxCell = row.Cells["Select"] as DataGridViewCheckBoxCell;
+                if (checkBoxCell != null && Convert.ToBoolean(checkBoxCell.Value))
+                {
+                    if (row.Cells["Amount"].Value != null)
+                    {
+                        OrderSum += Convert.ToDouble(row.Cells["Amount"].Value) * Convert.ToDouble(row.Cells["UnitPrice"].Value);
+                    }
+                    else { MessageBox.Show("Nie podałeś ilości któregoś produktu!"); };
+                }
+            }
+            label1.Text = OrderSum.ToString();
+        }
+
+        private void AllOrders_Click(object sender, EventArgs e)
+        {
+            NewOrder.Enabled = true;
+            AllOrders.Enabled = false;
         }
     }
 }
