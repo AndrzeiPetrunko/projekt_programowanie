@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,8 +23,9 @@ namespace projekt_programowanie
         private DataGridView dataGridView1;
         private Button button4;
         private Button button1;
-        private Label label1;
         private double OrderSum;
+        private bool isOrdOK;
+        private int CustomerID;
 
         public Form2()
         {
@@ -42,7 +44,6 @@ namespace projekt_programowanie
             this.NewOrder = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.button4 = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -151,23 +152,12 @@ namespace projekt_programowanie
             this.button4.Text = "Potwierdź";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Visible = false;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label1.Location = new System.Drawing.Point(270, 236);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(79, 29);
-            this.label1.TabIndex = 6;
-            this.label1.Text = "label1";
+            this.button4.Click += new System.EventHandler(this.Submit);
             // 
             // Form2
             // 
             this.BackColor = System.Drawing.Color.RoyalBlue;
             this.ClientSize = new System.Drawing.Size(749, 419);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.panel2);
@@ -179,7 +169,6 @@ namespace projekt_programowanie
             this.panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -209,9 +198,12 @@ namespace projekt_programowanie
         {
             if (panel2.Visible == false) { panel2.Visible = true; }
             else { panel2.Visible = false; };
-            if (button4.Visible == true) { button4.Visible = false; } else { button4.Visible = true; };
+            if (button4.Visible == true) button4.Visible = false;
+            if (dataGridView1.Visible == true) dataGridView1.Visible = false;
+            NewOrder.Enabled = true;
+            AllOrders.Enabled = true;
         }
-   private void Form2_Load(object sender, EventArgs e)
+        private void Form2_Load(object sender, EventArgs e)
         {
             SqlConnection Connection = new SqlConnection("Data Source = (localDB)\\MSSQLLocalDB; Initial Catalog = LocalDB; Integrated Security = true; MultipleActiveResultSets = true");
             Connection.Open();
@@ -231,33 +223,53 @@ namespace projekt_programowanie
                 Name = "Amount",
                 HeaderText = "Amount",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells
-                
+            };
+
+            dataGridView1.EditingControlShowing += (senderr, ee) =>
+            {
+                if (dataGridView1.CurrentCell.ColumnIndex == textBoxColumn.Index && ee.Control is TextBox)
+                {
+                    TextBox textBox = (TextBox)ee.Control;
+
+                    textBox.KeyPress += (s, args) =>
+                    {
+                        if (!char.IsDigit(args.KeyChar) && !char.IsControl(args.KeyChar))
+                        {
+                            args.Handled = true;
+                        }
+                    };
+                }
 
             };
             dataGridView1.Columns.Insert(0, checkBoxColumn);
             dataGridView1.Columns.Insert(4, textBoxColumn);
             dataGridView1.AllowUserToAddRows = false;
+            Connection.Close();
         }
+
 
         private void NewOrder_Click(object sender, EventArgs e)
         {
 
             if (dataGridView1.Visible == true && button4.Visible == true)
-            { dataGridView1.Visible = false;
-                button4.Visible = false; }
+            {   dataGridView1.Visible = false;
+                button4.Visible = false;}
             else
             {
                 dataGridView1.Visible = true;
                 button4.Visible = true;
+  
             }
+            
             NewOrder.Enabled = false;
             AllOrders.Enabled = true;
             
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void Submit(object sender, EventArgs e)
         {
             OrderSum = 0;
+            isOrdOK = false;
             foreach (DataGridViewRow row in dataGridView1.Rows)
             {
                 DataGridViewCheckBoxCell checkBoxCell = row.Cells["Select"] as DataGridViewCheckBoxCell;
@@ -265,18 +277,38 @@ namespace projekt_programowanie
                 {
                     if (row.Cells["Amount"].Value != null)
                     {
+                        isOrdOK = true;
                         OrderSum += Convert.ToDouble(row.Cells["Amount"].Value) * Convert.ToDouble(row.Cells["UnitPrice"].Value);
                     }
-                    else { MessageBox.Show("Nie podałeś ilości któregoś produktu!"); };
-                }
+                    else { isOrdOK = false; break; };
+                } 
             }
-            label1.Text = OrderSum.ToString();
+            if (isOrdOK) {
+                DateTime dateTime = DateTime.UtcNow.Date;
+                SqlConnection Connection = new SqlConnection("Data Source = (localDB)\\MSSQLLocalDB; Initial Catalog = LocalDB; Integrated Security = true; MultipleActiveResultSets = true");
+                Connection.Open();
+                string getCustomerIDQ = $"SELECT CustomerID FROM Customers WHERE FK_UserID = {Form1.UserID}";
+                SqlCommand getCustomerIDCom = new SqlCommand(getCustomerIDQ, Connection);
+                SqlDataReader getCustomerIDRead = getCustomerIDCom.ExecuteReader();
+                if (getCustomerIDRead.Read()) CustomerID = Convert.ToInt32(getCustomerIDRead.GetValue(0));
+                getCustomerIDRead.Close();
+                string query = $"INSERT INTO Orders(FKO_CustomerID, OrderDate, OrderPrice) VALUES ({CustomerID},'{dateTime.Year.ToString()}-{dateTime.Month.ToString()}-{dateTime.Day.ToString()}',{OrderSum.ToString(CultureInfo.CreateSpecificCulture("en-GB"))})";
+                SqlCommand cmd = new SqlCommand(query, Connection);
+                SqlDataReader sqlreader = cmd.ExecuteReader();
+                sqlreader.Close();
+                Connection.Close();
+                MessageBox.Show("Stworzyłeś zamówienie!", "Zamówienia"); } else { MessageBox.Show("Nie podałeś ilości któregoś produktu!"); }
+
+
         }
 
         private void AllOrders_Click(object sender, EventArgs e)
         {
             NewOrder.Enabled = true;
             AllOrders.Enabled = false;
+            if (button4.Visible == true) button4.Visible = false;
+            if (dataGridView1.Visible == true) dataGridView1.Visible = false;
+
         }
     }
 }
