@@ -351,6 +351,8 @@ namespace projekt_programowanie
                         sqlreader.Close();
                         Connection.Close();
                         MessageBox.Show("Stworzyłeś zamówienie!", "Zamówienia");
+
+
                 SqlDataAdapter Adapter = new SqlDataAdapter("SELECT ProductName, UnitsInStock, UnitPrice FROM Products", Connection);
                 DataSet dataSet = new DataSet();
                 Adapter.Fill(dataSet, "Products");
